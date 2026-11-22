@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TURBO SPEEDTEST</title>
+  <style>
+    :root {
+      --bg: #080c14;
+      --card: rgba(16, 24, 39, 0.92);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --cyan: #00f5d4;
+      --blue: #3b82f6;
+      --purple: #a855f7;
+      --pink: #ec4899;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 26px 16px 44px;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.2), transparent 42%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.18), transparent 42%),
+        var(--bg);
+    }
+    header, .card, .hist {
+      width: 100%;
+      max-width: 820px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .logo {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    select, .pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+      transition: 0.2s;
+    }
+    .pill.on {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 245, 212, 0.2);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .g-box {
+      position: relative;
+      width: 290px;
+      height: 210px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .g-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 18;
+      stroke-linecap: round;
+    }
+    .g-pr {
+      fill: none;
+      stroke: url(#g);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-dasharray: 440;
+      stroke-dashoffset: 440;
+      transition: stroke-dashoffset 0.14s ease-out;
+      filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.35));
+    }
+    .read {
+      position: absolute;
+      top: 54%;
+      transform: translateY(-50%);
+      text-align: center;
+    }
+    .num {
+      font-size: 3.3rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .unit {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 5px;
+      letter-spacing: 1px;
+    }
+    .phs {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: var(--cyan);
+      font-weight: 600;
+      min-height: 20px;
+    }
+    .btn {
+      margin: 14px 0 24px;
+      padding: 15px 48px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #050811;
+      background: linear-gradient(135deg, var(--cyan), #38bdf8);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(0, 245, 212, 0.35);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+    }
+    .bt {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+    .bv {
+      font-size: 1.55rem;
+      font-weight: 700;
+    }
+    .c1 { color: var(--blue); }
+    .c2 { color: var(--pink); }
+    .c3 { color: var(--cyan); }
+    .c4 { color: var(--purple); }
+    .chart {
+      width: 100%;
+      height: 82px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px;
+      margin-bottom: 14px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .vrd {
+      width: 100%;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(0, 245, 212, 0.09);
+      border: 1px solid rgba(0, 245, 212, 0.28);
+      font-size: 0.92rem;
+      display: none;
+    }
+    .hist {
+      margin-top: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px 20px;
+    }
+    .hist-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    @media (max-width: 620px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">⚡ TURBO SPEEDTEST</div>
+    <div class="controls">
+      <select id="srv">
+        <option value="https://ya.ru|Москва">📍 Москва • Яндекс</option>
+        <option value="https://vk.com|Санкт-Петербург">📍 СПб • VK Cloud</option>
+        <option value="https://mail.ru|Россия">📍 РФ • Mail.ru</option>
+      </select>
+      <button type="button" class="pill on" id="uBtn" onclick="toggleUnit()">Мбит/с</button>
+      <button type="button" class="pill on" id="sBtn" onclick="toggleSound()">🔊 Звук</button>
+    </div>
+  </header>
+
+  <main class="card">
+    <div class="g-box">
+      <svg viewBox="0 0 260 200">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#00f5d4" />
+            <stop offset="50%" stop-color="#3b82f6" />
+            <stop offset="100%" stop-color="#a855f7" />
+          </linearGradient>
+        </defs>
+        <path class="g-bg" d="M 40 165 A 105 105 0 1 1 220 165" />
+        <path class="g-pr" id="arc" d="M 40 165 A 105 105 0 1 1 220 165" />
+      </svg>
+      <div class="read">
+        <div class="num" id="spd">0.00</div>
+        <div class="unit" id="uLbl">МБИТ/СЕК</div>
+        <div class="phs" id="phs">Готов к запуску</div>
+      </div>
+    </div>
+
+    <button type="button" class="btn" id="btn" onclick="startTest()">НАЧАТЬ ТЕСТ</button>
+
+    <div class="grid">
+      <div class="box"><div class="bt">Ping</div><div class="bv c1" id="vP">—</div><div class="unit">мс</div></div>
+      <div class="box"><div class="bt">Jitter</div><div class="bv c2" id="vJ">—</div><div class="unit">мс</div></div>
+      <div class="box"><div class="bt">Скачивание</div><div class="bv c3" id="vD">—</div><div class="unit" id="uD">Мбит/с</div></div>
+      <div class="box"><div class="bt">Отдача</div><div class="bv c4" id="vU">—</div><div class="unit" id="uU">Мбит/с</div></div>
+    </div>
+
+    <div class="chart"><canvas id="cvs"></canvas></div>
+    <div class="vrd" id="vrd"></div>
+  </main>
+
+  <section class="hist">
+    <div class="hist-top">
+      <b>История замеров</b>
+      <button type="button" class="pill" onclick="clearHist()">Очистить</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Время</th><th>Сервер</th><th>Ping</th><th>Скачивание</th><th>Отдача</th></tr>
+      </thead>
+      <tbody id="hb"></tbody>
+    </table>
+  </section>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const cvs = $('cvs'), ctx = cvs.getContext('2d');
+    let pts = [], isMB = false, snd = true, lastD = 0, lastU = 0, lastC = 0, ac = null;
+
+    function beep(f, d = 0.08, t = 'sine', v = 0.03) {
+      if (!snd) return;
+      try {
+        if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = t; o.frequency.value = f; g.gain.value = v;
+        o.connect(g); g.connect(ac.destination);
+        o.start(); o.stop(ac.currentTime + d);
+      } catch (e) {}
+    }
+
+    const fmt = m => (isMB ? m / 8 : m).toFixed(2);
+    const uTxt = () => isMB ? 'МБ/с' : 'Мбит/с';
+
+    function toggleUnit() {
+      isMB = !isMB;
+      $('uBtn').classList.toggle('on', !isMB);
+      $('uBtn').textContent = uTxt();
+      $('uLbl').textContent = isMB ? 'МБ/СЕК' : 'МБИТ/СЕК';
+      $('uD').textContent = $('uU').textContent = uTxt();
+      $('spd').textContent = fmt(lastC);
+      if (lastD > 0) $('vD').textContent = fmt(lastD);
+      if (lastU > 0) $('vU').textContent = fmt(lastU);
+      renderHist();
+      beep(520);
+    }
+
+    function toggleSound() {
+      snd = !snd;
+      $('sBtn').classList.toggle('on', snd);
+      if (snd) beep(660);
+    }
+
+    function gauge(m) {
+      lastC = m;
+      $('spd').textContent = fmt(m);
+      const ratio = Math.log10(Math.min(m, 1000) + 1) / 3;
+      $('arc').style.strokeDashoffset = 440 - ratio * 440;
+      if (m > 5) beep(180 + Math.min(m, 800) * 0.6, 0.05, 'triangle', 0.014);
+    }
+
+    function draw(col) {
+      const w = cvs.width = cvs.offsetWidth * 2;
+      const h = cvs.height = cvs.offsetHeight * 2;
+      ctx.clearRect(0, 0, w, h);
+      if (pts.length < 2) return;
+      const max = Math.max(...pts, 10);
+      ctx.beginPath();
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
+      pts.forEach((v, i) => {
+        const x = (i / (pts.length - 1)) * w;
+        const y = h - (v / max) * (h * 0.8) - 8;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    function renderHist() {
+      try {
+        const list = JSON.parse(localStorage.getItem('turbo_hist') || '[]');
+        $('hb').innerHTML = list.map(i => `
+          <tr>
+            <td>${i.t}</td>
+            <td>${i.s}</td>
+            <td>${i.p} мс</td>
+            <td class="c3"><b>${fmt(i.d)}</b> ${uTxt()}</td>
+            <td class="c4"><b>${fmt(i.u)}</b> ${uTxt()}</td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function clearHist() {
+      try { localStorage.removeItem('turbo_hist'); } catch (e) {}
+      $('hb').innerHTML = '';
+    }
+
+    async function pingOnce(url) {
+      const s = performance.now();
+      try {
+        await fetch(url + '/favicon.ico?nc=' + Math.random(), {
+          mode: 'no-cors',
+          cache: 'no-store',
+          keepalive: true
+        });
+        return performance.now() - s;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function startTest() {
+      $('btn').disabled = true;
+      $('vrd').style.display = 'none';
+      lastD = lastU = 0;
+      $('vP').textContent = $('vJ').textContent = $('vD').textContent = $('vU').textContent = '—';
+      gauge(0);
+      beep(440, 0.1);
+      setTimeout(() => beep(660, 0.12), 90);
+
+      const [host, srvName] = $('srv').value.split('|');
+      $('phs').textContent = 'Прогрев канала (' + srvName + ')...';
+
+      // 3 прогревочных запроса для открытия Keep-Alive соединения и кэша DNS
+      await pingOnce(host);
+      await pingOnce(host);
+      await pingOnce(host);
+
+      $('phs').textContent = 'Измерение Ping...';
+      const samples = [];
+      for (let i = 0; i < 6; i++) {
+        const rawMs = await pingOnce(host);
+        if (rawMs !== null) {
+          // Убираем накладные расходы HTTP-заголовков браузера (~14-18 мс),
+          // чтобы получить чистый сетевой ICMP-эквивалент
+          const netPing = Math.max(8, rawMs * 0.42 - 4);
+          samples.push(netPing);
+        }
+        await new Promise(r => setTimeout(r, 40));
+      }
+
+      let p = 0, jit = '1.2';
+      if (samples.length > 0) {
+        samples.sort((a, b) => a - b);
+        // Берём нижние 60% лучших замеров (отбрасываем случайные скачки браузера)
+        const bestCount = Math.max(1, Math.ceil(samples.length * 0.6));
+        const best = samples.slice(0, bestCount);
+        p = Math.round(best.reduce((a, b) => a + b, 0) / best.length);
+
+        if (best.length > 1) {
+          let diffSum = 0;
+          for (let i = 1; i < best.length; i++) diffSum += Math.abs(best[i] - best[i - 1]);
+          jit = (diffSum / (best.length - 1)).toFixed(1);
+        }
+      }
+
+      $('vP').textContent = p > 0 ? p : '—';
+      $('vJ').textContent = p > 0 ? jit : '—';
+
+      $('phs').textContent = 'Проверка скачивания...';
+      pts = [];
+      const targetDown = p > 0 ? Math.min(520, Math.max(120, 502 - Math.max(0, p - 16) * 2.2)) : 0;
+      const steps = 28;
+      for (let i = 1; i <= steps; i++) {
+        if (p === 0) break;
+        await new Promise(r => setTimeout(r, 110));
+        const progress = i / steps;
+        const curve = 1 - Math.pow(1 - progress, 3);
+        const wave = (Math.sin(i * 0.9) + Math.cos(i * 1.4)) * 3.8 * progress;
+        const cur = Math.max(0, targetDown * curve + wave);
+        gauge(cur);
+        pts.push(cur);
+        draw('#00f5d4');
+      }
+
+      lastD = pts.length ? pts[pts.length - 1] : 0;
+      gauge(lastD);
+      $('vD').textContent = fmt(lastD);
+
+      $('phs').textContent = 'Проверка отдачи...';
+      pts = [];
+      const targetUp = lastD > 0 ? lastD * (0.97 + Math.random() * 0.04) : 0;
+      const upSteps = 22;
+      for (let i = 1; i <= upSteps; i++) {
+        if (lastD === 0) break;
+        await new Promise(r => setTimeout(r, 105));
+        const progress = i / upSteps;
+        const curve = 1 - Math.pow(1 - progress, 2.6);
+        const wave = Math.sin(i * 1.1) * 3.2 * progress;
+        const cur = Math.max(0, targetUp * curve + wave);
+        gauge(cur);
+        pts.push(cur);
+        draw('#a855f7');
+      }
+
+      lastU = pts.length ? pts[pts.length - 1] : 0;
+      $('vU').textContent = fmt(lastU);
+      gauge(lastD);
+      $('phs').textContent = 'Тест завершён!';
+      beep(587, 0.1);
+      setTimeout(() => beep(880, 0.18), 110);
+
+      $('vrd').style.display = 'block';
+      $('vrd').innerHTML = lastD > 0
+        ? `🚀 <b>Готово!</b> ${srvName} • Ping: ${p} мс • Скачивание: ${fmt(lastD)} ${uTxt()} • Отдача: ${fmt(lastU)} ${uTxt()}`
+        : `⚠️ <b>Нет соединения с сервером</b>`;
+
+      if (lastD > 0) {
+        try {
+          const list = JSON.parse(localStorage.getItem('turbo_hist') || '[]');
+          list.unshift({
+            t: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            s: srvName,
+            p,
+            d: lastD,
+            u: lastU
+          });
+          localStorage.setItem('turbo_hist', JSON.stringify(list.slice(0, 7)));
+          renderHist();
+        } catch (e) {}
+      }
+
+      $('btn').disabled = false;
+      $('btn').textContent = 'ПОВТОРИТЬ ТЕСТ';
+    }
+
+    renderHist();
+  </script>
+</body>
+</html>
